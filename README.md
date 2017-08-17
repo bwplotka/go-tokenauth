@@ -65,3 +65,5 @@ func (t *exampleTripper) RoundTrip(req *http.Request) (*http.Response, error) {
 }
 
 ```
+
+See ready to use [tripper](./http/tripper.go)

@@ -2,9 +2,9 @@ package k8sauth
 
 import (
 	"github.com/Bplotka/go-tokenauth"
-	"github.com/Bplotka/go-tokenauth/direct"
-	"github.com/Bplotka/go-tokenauth/oauth2"
-	"github.com/Bplotka/go-tokenauth/oidc"
+	"github.com/Bplotka/go-tokenauth/sources/direct"
+	"github.com/Bplotka/go-tokenauth/sources/oauth2"
+	"github.com/Bplotka/go-tokenauth/sources/oidc"
 	"github.com/Bplotka/oidc/login/k8scache"
 	"github.com/pkg/errors"
 	cfg "k8s.io/client-go/tools/clientcmd"

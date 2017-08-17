@@ -41,7 +41,7 @@ func New(name string, configPath string, userName string) (tokenauth.Source, err
 			s, _, err := oidcauth.NewWithCache(name, cache, nil)
 			return s, err
 		case "gcp":
-			c, err := oauth2auth.NewOauth2ConfigFromMap(info.AuthProvider.Config)
+			c, err := oauth2auth.NewConfigFromMap(info.AuthProvider.Config)
 			if err != nil {
 				return nil, errors.Wrap(err, "Failed to create OAuth2 config from map.")
 			}

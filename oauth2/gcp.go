@@ -20,9 +20,9 @@ import (
 	"k8s.io/client-go/util/jsonpath"
 )
 
-// Oauth2Config represents Oauth2 config with additional CLI configuration to get access token.
+// Config represents Oauth2 config with additional CLI configuration to get access token.
 // Compliant with k8s config.
-type Oauth2Config struct {
+type Config struct {
 	CmdPath string `json:"cmd-path,omitempty"`
 	CmdArgs string `json:"cmd-args,omitempty"`
 
@@ -33,7 +33,7 @@ type Oauth2Config struct {
 	Expiry      string `json:"expiry,omitempty"`
 }
 
-func (c Oauth2Config) toMap() (map[string]string, error) {
+func (c Config) toMap() (map[string]string, error) {
 	config := c
 	m, err := json.Marshal(config)
 	if err != nil {
@@ -45,21 +45,23 @@ func (c Oauth2Config) toMap() (map[string]string, error) {
 	return r, err
 }
 
-func NewOauth2ConfigFromMap(m map[string]string) (Oauth2Config, error) {
-	marshalled, err := json.Marshal(m)
+// NewConfigFromMap constructs Oauth2 config but from generic map[string]string. Useful when used with kube config.
+func NewConfigFromMap(m map[string]string) (Config, error) {
+	marshaled, err := json.Marshal(m)
 	if err != nil {
-		return Oauth2Config{}, err
+		return Config{}, err
 	}
 
-	r := Oauth2Config{}
-	err = json.Unmarshal(marshalled, &r)
+	r := Config{}
+	err = json.Unmarshal(marshaled, &r)
 	return r, err
 
 }
+
 // NewGCP constructs Oauth2 for Google provider tokenauth.Source which returns valid access tokens.
 // Since saving and loading config is complainant with kube/config you are free to reuse that by putting kube config path inside
 // `configPath` variable. This config file will be also used for caching valid tokens.
-func NewGCP(name string, userName string, configPath string, initialConfig Oauth2Config) (tokenauth.Source, error) {
+func NewGCP(name string, userName string, configPath string, initialConfig Config) (tokenauth.Source, error) {
 	var err error
 	var ts oauth2.TokenSource
 	// Use CLI?
@@ -88,7 +90,7 @@ func NewGCP(name string, userName string, configPath string, initialConfig Oauth
 
 // AuthCache allows to save configuration info for just itself.
 type AuthCache interface {
-	Save(Oauth2Config) error
+	Save(Config) error
 }
 
 // Complainant with kube config.
@@ -98,7 +100,7 @@ type authCache struct {
 	name       string
 }
 
-func (c *authCache) Save(config Oauth2Config) error {
+func (c *authCache) Save(config Config) error {
 	configContent, err := cfg.LoadFromFile(c.configPath)
 	if err != nil {
 		return errors.Wrapf(err, "Failed to load config from file %v. Make sure it is there or change"+
@@ -132,10 +134,10 @@ type cachedTokenSource struct {
 	accessToken string
 	expiry      time.Time
 	cache       AuthCache
-	config      Oauth2Config
+	config      Config
 }
 
-func newCachedTokenSource(config Oauth2Config, cache AuthCache, ts oauth2.TokenSource) (*cachedTokenSource, error) {
+func newCachedTokenSource(config Config, cache AuthCache, ts oauth2.TokenSource) (*cachedTokenSource, error) {
 	var expiryTime time.Time
 	if parsedTime, err := time.Parse(time.RFC3339Nano, config.Expiry); err == nil {
 		expiryTime = parsedTime
@@ -177,7 +179,7 @@ func (t *cachedTokenSource) cachedToken() *oauth2.Token {
 	}
 }
 
-func (t *cachedTokenSource) update(tok *oauth2.Token) Oauth2Config {
+func (t *cachedTokenSource) update(tok *oauth2.Token) Config {
 	t.mu.Lock()
 	defer t.mu.Unlock()
 	t.accessToken = tok.AccessToken
@@ -197,7 +199,7 @@ type commandTokenSource struct {
 	timeFmt   string
 }
 
-func newCmdTokenSource(config Oauth2Config) *commandTokenSource {
+func newCmdTokenSource(config Config) *commandTokenSource {
 	timeFmt := config.TimeFmt
 	if len(timeFmt) == 0 {
 		timeFmt = time.RFC3339Nano

@@ -1,4 +1,6 @@
 # go-tokenauth
+[![Build Status](https://travis-ci.org/Bplotka/go-tokenauth.svg?branch=master)](https://travis-ci.org/Bplotka/go-tokenauth) [![Go Report Card](https://goreportcard.com/badge/github.com/Bplotka/go-tokenauth)](https://goreportcard.com/report/github.com/Bplotka/go-tokenauth)
+
 
 This package contains different useful Auth Sources that can return valid auth token for future use in a form of string.
 
